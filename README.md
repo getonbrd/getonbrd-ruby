@@ -56,7 +56,12 @@ categories.map(&:name)
 # retrieve the Programming category
 programming = Getonbrd::Public::Category.retrieve("programming")
 # retrieve the published jobs under programming
-programming.jobs
+# notice that you can pass options the amount of jobs per page, the page
+# and even expanding the response to bring the tags
+jobs = programming.jobs(expand: ["tags"], per_page: 10, page: 2)
+jobs.first.tags.map(&:name)
+# select those looking for a remote position then list the modalities
+jobs.select(&:remote?).map(&:remote_modality)
 
 # Searching jobs using a free text
 jobs = Getonbrd::Public::Search.jobs("remote backend ruby on rails")
@@ -64,7 +69,7 @@ jobs = Getonbrd::Public::Search.jobs("remote backend ruby on rails")
 
 ### Private facet
 
-Authenticated access to your company's data. an API key - that can be found in the page of settings within your account in Get on Board - is needed.
+Authenticated access to your company's data. an API key - that can be found in the settings page of your account in Get on Board - is needed.
 
 #### Initialize the library with the API Key
 
@@ -74,7 +79,8 @@ Using your method of preference, initialize the library setting up the API Key. 
 # file: app/initializers/getonbrd.rb
 require "getonbrd"
 
-Getonbrd.api_key = ENV["GoB_API_KEY"] # it is a good idea to use an env not exposing the key
+# it is a good idea to use an env not exposing the key
+Getonbrd.api_key = ENV["GOB_API_KEY"]
 ```
 
 #### Models
@@ -95,7 +101,8 @@ end
 # it is possible to paginate thru applications and professionals directly too
 apps = Getonbrd::Private::Application.all
 # in the case of professionals, a process id is needed
-professionals = Getonbrd::Private::Professional.all(process_id: <process-id>, per_page: 50)
+professionals = Getonbrd::Private::Professional.all(process_id: <process-id>,
+                                                    per_page: 50)
 
 # create an application
 app_attrs = {
@@ -122,7 +129,7 @@ For instance a `job` has `tags`. If the response is not _expanded_, it will retu
 job = Getonbrd::Private::Job.retrieve(job_id, expand: ["tags", "questions"])
 # the tags and questions come expanded within the response
 job.tags.map(&:name)
-job.questions.each { |q| puts "#{q.required ? "*" : ""} #{q.title}" }
+job.questions.each { |q| puts "#{q.required? ? "*" : ""} #{q.title}" }
 ```
 
 ## Development
